@@ -14,7 +14,8 @@ void preds_calc(Eigen::MatrixXd& result,
                 const Eigen::MatrixXd& u_glm,
                 int j,
                 int B,
-                std::string estimand) {
+                std::string estimand,
+                Rcpp::Function inv) {
   
   // these are N_j x B
   Eigen::MatrixXd pred_lm_j = dmat_lm * beta_lm.transpose();
@@ -25,6 +26,7 @@ void preds_calc(Eigen::MatrixXd& result,
   
   pred_glm_j = pred_glm_j.unaryExpr(&sigmoid);
   Eigen::MatrixXd unit_preds_j = pred_lm_j.cwiseProduct(pred_glm_j);
+  unit_preds_j = unit_preds_j.unaryExpr([&inv](double x) { return Rcpp::as<double>(inv(x)); });
   
   int N_j = unit_preds_j.rows();
   
@@ -46,7 +48,8 @@ SEXP generate_preds(const Eigen::MatrixXd& beta_lm,
                     const Eigen::MatrixXd& u_glm,
                     const Rcpp::List& design_mats,
                     int J,
-                    std::string estimand) {
+                    std::string estimand,
+                    Rcpp::Function inv) {
   
   int B = u_lm.rows();
   
@@ -68,7 +71,8 @@ SEXP generate_preds(const Eigen::MatrixXd& beta_lm,
                u_glm,
                j, 
                B,
-               estimand);
+               estimand,
+               inv);
     
   }
 
