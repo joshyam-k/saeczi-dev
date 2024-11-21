@@ -617,12 +617,13 @@ collect_preds <- function(mod1, mod2, estimand, .data, domain_level, inv_transfo
   
   lin_pred <- predict(mod1, newdata = .data, allow.new.levels = TRUE)
   log_pred <- predict(mod2, newdata = .data, type = "response", allow.new.levels = TRUE)
-    
-  unit_preds <- lin_pred * log_pred
   
   if (!is.null(inv_transform_fun)) {
-    unit_preds <- inv_transform_fun(unit_preds)
+    lin_preds <- inv_transform_fun(lin_preds)
   }
+  
+  unit_preds <- lin_pred * log_pred
+
   
   out <- switch(estimand,
                 "means" = agg_stat(unit_preds, .data[[domain_level]], mean),

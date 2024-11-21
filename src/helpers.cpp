@@ -25,12 +25,13 @@ void preds_calc(Eigen::MatrixXd& result,
   pred_glm_j.rowwise() += u_glm.col(j).transpose();
   
   pred_glm_j = pred_glm_j.unaryExpr(&sigmoid);
-  Eigen::MatrixXd unit_preds_j = pred_lm_j.cwiseProduct(pred_glm_j);
   
   if (!inv.isNull()) {
     Rcpp::Function invFunc = Rcpp::as<Rcpp::Function>(inv);
-    unit_preds_j = unit_preds_j.unaryExpr([&invFunc](double x) { return Rcpp::as<double>(invFunc(x)); });
+    preds_lm_j = preds_lm_j.unaryExpr([&invFunc](double x) { return Rcpp::as<double>(invFunc(x)); });
   }
+  
+  Eigen::MatrixXd unit_preds_j = pred_lm_j.cwiseProduct(pred_glm_j);
 
   int N_j = unit_preds_j.rows();
   

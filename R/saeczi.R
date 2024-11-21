@@ -108,13 +108,39 @@ saeczi <- function(samp_dat,
     boot_log_formula <- reformulate(c(log_X, rand_intercept), "response != 0")
 
     if (estimand == "means") {
-      boot_truth <- boot_pop_data |>
-        group_by(!!sym(domain_level)) |>
-        summarise(domain_est = mean(response))
+      
+      if (!is.null(inv_transform_fun)) {
+        
+        boot_truth <- boot_pop_data |>
+          mutate(response = inv_transform_fun(response)) |>
+          group_by(!!sym(domain_level)) |>
+          summarise(domain_est = mean(response))
+        
+      } else {
+        
+        boot_truth <- boot_pop_data |>
+          group_by(!!sym(domain_level)) |>
+          summarise(domain_est = mean(response)) 
+        
+      }
+      
     } else {
-      boot_truth <- boot_pop_data |>
-        group_by(!!sym(domain_level)) |>
-        summarise(domain_est = sum(response))
+      
+      if (!is.null(inv_transform_fun)) {
+        
+        boot_truth <- boot_pop_data |>
+          mutate(response = inv_transform_fun(response)) |>
+          group_by(!!sym(domain_level)) |>
+          summarise(domain_est = sum(response))
+        
+      } else {
+        
+        boot_truth <- boot_pop_data |>
+          group_by(!!sym(domain_level)) |>
+          summarise(domain_est = sum(response)) 
+        
+      }
+
     }
 
     boot_samp_ls <- samp_by_grp(samp_dat, boot_pop_data, domain_level, B)
