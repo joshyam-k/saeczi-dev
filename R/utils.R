@@ -619,7 +619,7 @@ collect_preds <- function(mod1, mod2, estimand, .data, domain_level, inv_transfo
   log_pred <- predict(mod2, newdata = .data, type = "response", allow.new.levels = TRUE)
   
   if (!is.null(inv_transform_fun)) {
-    lin_preds <- inv_transform_fun(lin_preds)
+    lin_pred <- inv_transform_fun(lin_pred)
   }
   
   unit_preds <- lin_pred * log_pred

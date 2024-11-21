@@ -28,7 +28,7 @@ void preds_calc(Eigen::MatrixXd& result,
   
   if (!inv.isNull()) {
     Rcpp::Function invFunc = Rcpp::as<Rcpp::Function>(inv);
-    preds_lm_j = preds_lm_j.unaryExpr([&invFunc](double x) { return Rcpp::as<double>(invFunc(x)); });
+    pred_lm_j = pred_lm_j.unaryExpr([&invFunc](double x) { return Rcpp::as<double>(invFunc(x)); });
   }
   
   Eigen::MatrixXd unit_preds_j = pred_lm_j.cwiseProduct(pred_glm_j);
