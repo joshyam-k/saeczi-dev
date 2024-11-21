@@ -51,7 +51,9 @@ saeczi <- function(samp_dat,
                    B = 100L,
                    mse_est = FALSE,
                    estimand = "means",
-                   parallel = FALSE) {
+                   parallel = FALSE,
+                   transform_fun = NULL,
+                   inv_transform_fun = NULL) {
 
   funcCall <- match.call()
 
@@ -60,7 +62,10 @@ saeczi <- function(samp_dat,
   check_inherits("character", domain_level, estimand)
   check_inherits("integer", B)
   check_inherits("logical", mse_est, parallel)
-  
+  if (!is.null(transform_fun)) {
+    check_inherits("function", transform_fun)
+    check_inherits("function", inv_transform_fun)
+  }
   check_parallel(parallel)
   check_re(pop_dat, samp_dat, domain_level)
 
@@ -81,17 +86,18 @@ saeczi <- function(samp_dat,
   original_out <- fit_zi(samp_dat,
                          lin_formula,
                          log_formula,
-                         domain_level)
+                         domain_level,
+                         transform_fun)
 
   mod1 <- original_out$lmer
   mod2 <- original_out$glmer
 
   .data <- pop_dat[, c(all_preds, domain_level)]
 
-  original_pred <- collect_preds(mod1, mod2, estimand, .data, domain_level)
+  original_pred <- collect_preds(mod1, mod2, estimand, .data, domain_level, inv_transform_fun)
 
   if (mse_est) {
-
+    
     boot_pop_data <- generate_boot_pop(original_out,
                                        pop_dat,
                                        domain_level,
@@ -124,7 +130,8 @@ saeczi <- function(samp_dat,
                                  boot_truth,
                                  estimand,
                                  lin_X,
-                                 log_X)
+                                 log_X,
+                                 inv_transform_fun)
         })
 
     } else {
@@ -173,7 +180,8 @@ saeczi <- function(samp_dat,
                                  u_glm = u_glm,
                                  lin_X = lin_X,
                                  log_X = log_X,
-                                 estimand = estimand)
+                                 estimand = estimand,
+                                 inv = inv_transform_fun)
     
 
       boot_res <- preds_full
